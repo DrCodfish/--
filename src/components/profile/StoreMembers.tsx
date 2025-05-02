@@ -1,4 +1,3 @@
-
 import { useAuth } from "@/context/auth-context";
 import { useStore } from "@/context/store-context";
 import { Button } from "@/components/ui/button";
@@ -8,37 +7,37 @@ import { Trash, User, UserCheck } from "lucide-react";
 export function StoreMembers() {
   const { stores } = useStore();
   const { currentUser } = useAuth();
-  
+
   if (!currentUser?.isOwner || !currentUser?.storeId) {
     return null;
   }
-  
-  const userStore = stores.find(store => store.id === currentUser.storeId);
-  
-  const handleRemoveUser = (userId: string) => {
-  const { error } = await supabase
-    .from('users')
-    .delete()
-    .eq('id', userId);
 
-  if (error) {
-    console.error('Failed to remove user:', error);
-  } else {
-    console.log('User removed:', userId);
-  }
-  };
+  const userStore = stores.find((store) => store.id === currentUser.storeId);
 
-  const handleApproveUser = (userId: string) => {
+  const handleRemoveUser = async (userId: string) => {
     const { error } = await supabase
-      .from('users')
-      .update({ approved: true})
-      .eq('id', userID);
+      .from("users")
+      .delete()
+      .eq("id", userId);
 
     if (error) {
-      console.error('Failed to approve user:' error);
+      console.error("Failed to remove user:", error);
     } else {
-      console.log('User approved:' userID);
-    }    console.log('Approve user:', userId);
+      console.log("User removed:", userId);
+    }
+  };
+
+  const handleApproveUser = async (userId: string) => {
+    const { error } = await supabase
+      .from("users")
+      .update({ approved: true })
+      .eq("id", userId);
+
+    if (error) {
+      console.error("Failed to approve user:", error);
+    } else {
+      console.log("User approved:", userId);
+    }
   };
 
   return (
@@ -54,15 +53,15 @@ export function StoreMembers() {
                 <span>Pending Employee</span>
               </div>
               <div className="flex gap-2">
-                <Button 
+                <Button
                   variant="default"
                   size="sm"
                   onClick={() => handleApproveUser("pending-id")}
                 >
                   <UserCheck className="h-4 w-4" />
                 </Button>
-                <Button 
-                  variant="destructive" 
+                <Button
+                  variant="destructive"
                   size="sm"
                   onClick={() => handleRemoveUser("pending-id")}
                 >
@@ -84,8 +83,8 @@ export function StoreMembers() {
                 <User className="h-4 w-4" />
                 <span>Example Employee</span>
               </div>
-              <Button 
-                variant="destructive" 
+              <Button
+                variant="destructive"
                 size="sm"
                 onClick={() => handleRemoveUser("example-id")}
               >
