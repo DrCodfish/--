@@ -1,10 +1,11 @@
-
 import { createContext, useContext, useState, ReactNode } from 'react';
+import { supabase } from '../supabaseClient'; // Ensure Supabase is properly initialized
+import { hash, compare } from 'bcryptjs'; // For hashing and comparing passwords
 
 export interface User {
   id: string;
   username: string;
-  password: string;
+  password?: string; // Password is optional to avoid exposing it unnecessarily
   isOwner: boolean;
   storeId: string | null;
   approved: boolean;
@@ -13,18 +14,11 @@ export interface User {
 interface AuthContextType {
   currentUser: User | null;
   setCurrentUser: (user: User | null) => void;
-  login: (username: string, password: string, isOwner: boolean) => User | null;
-  register: (username: string, password: string, isOwner: boolean, storeId?: string) => User;
+  login: (username: string, password: string) => Promise<User | null>;
+  register: (username: string, password: string, isOwner: boolean, storeId?: string) => Promise<User | null>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
-
-// Initial mock data
-const initialUsers: User[] = [
-  { id: '1', username: 'owner1', password: 'pass123', isOwner: true, storeId: '1', approved: true },
-  { id: '2', username: 'employee1', password: 'pass123', isOwner: false, storeId: '1', approved: true },
-  { id: '3', username: 'owner2', password: 'pass123', isOwner: true, storeId: '2', approved: true },
-];
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
@@ -36,50 +30,81 @@ export const useAuth = () => {
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
-  const [users, setUsers] = useState<User[]>(initialUsers);
 
-  const generateId = () => Math.random().toString(36).substring(2, 9);
+  const login = async (username: string, password: string): Promise<User | null> => {
+    try {
+      // Fetch user from the database by username
+      const { data, error } = await supabase
+        .from('users')
+        .select('id, username, password, is_owner, store_id, approved')
+        .eq('username', username)
+        .single();
 
-  const login = (username: string, password: string, isOwner: boolean) => {
-    const user = users.find(
-      u => u.username === username && 
-      u.password === password && 
-      u.isOwner === isOwner
-    );
-    
-    if (user) {
-      if (!isOwner && !user.approved) {
+      if (error || !data) {
+        console.error('Login failed: User not found or error occurred', error);
         return null;
       }
+
+      // Compare provided password with the stored hashed password
+      const isMatch = await compare(password, data.password);
+      if (!isMatch) {
+        console.error('Login failed: Invalid password');
+        return null;
+      }
+
+      const user: User = {
+        id: data.id,
+        username: data.username,
+        isOwner: data.is_owner,
+        storeId: data.store_id,
+        approved: data.approved,
+      };
+
       setCurrentUser(user);
       return user;
+    } catch (err) {
+      console.error('Unexpected error during login:', err);
+      return null;
     }
-    
-    return null;
   };
 
-  const register = (username: string, password: string, isOwner: boolean, storeId?: string) => {
-    const newUser = {
-      id: generateId(),
-      username,
-      password,
-      isOwner,
-      storeId: storeId || null,
-      approved: isOwner // Owners are automatically approved
-    };
-    
-    setUsers([...users, newUser]);
-    setCurrentUser(newUser);
-    return newUser;
+  const register = async (username: string, password: string, isOwner: boolean, storeId?: string): Promise<User | null> => {
+    try {
+      // Hash the password before storing it
+      const hashedPassword = await hash(password, 10);
+
+      // Insert new user into the database
+      const { data, error } = await supabase.from('users').insert({
+        username,
+        password: hashedPassword,
+        is_owner: isOwner,
+        store_id: storeId || null,
+        approved: isOwner, // Auto-approve owners
+      }).select().single();
+
+      if (error || !data) {
+        console.error('Registration failed:', error.message);
+        return null;
+      }
+
+      const newUser: User = {
+        id: data.id,
+        username: data.username,
+        isOwner: data.is_owner,
+        storeId: data.store_id,
+        approved: data.approved,
+      };
+
+      setCurrentUser(newUser);
+      return newUser;
+    } catch (err) {
+      console.error('Unexpected error during registration:', err);
+      return null;
+    }
   };
 
   return (
-    <AuthContext.Provider value={{
-      currentUser,
-      setCurrentUser,
-      login,
-      register
-    }}>
+    <AuthContext.Provider value={{ currentUser, setCurrentUser, login, register }}>
       {children}
     </AuthContext.Provider>
   );

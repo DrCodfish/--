@@ -16,13 +16,29 @@ export function StoreMembers() {
   const userStore = stores.find(store => store.id === currentUser.storeId);
   
   const handleRemoveUser = (userId: string) => {
-    // This will be implemented when backend is connected via Supabase
-    console.log('Remove user:', userId);
+  const { error } = await supabase
+    .from('users')
+    .delete()
+    .eq('id', userId);
+
+  if (error) {
+    console.error('Failed to remove user:', error);
+  } else {
+    console.log('User removed:', userId);
+  }
   };
 
   const handleApproveUser = (userId: string) => {
-    // This will be implemented when backend is connected via Supabase
-    console.log('Approve user:', userId);
+    const { error } = await supabase
+      .from('users')
+      .update({ approved: true})
+      .eq('id', userID);
+
+    if (error) {
+      console.error('Failed to approve user:' error);
+    } else {
+      console.log('User approved:' userID);
+    }    console.log('Approve user:', userId);
   };
 
   return (

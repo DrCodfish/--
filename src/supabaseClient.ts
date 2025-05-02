@@ -1,7 +1,6 @@
-// src/supabaseClient.ts
-import { createClient } from '@supabase/supabase-js';
+/import { createClient } from '@supabase/supabase-js';
 
-/* const supabaseUrl = 'https://your-project-ref.supabase.co'; // Replace with Supabase URL
-const supabaseKey = 'your-anon-key'; // Replace with your Supabase public API key
+const supabaseUrl = process.env.REACT_APP_SUPABASE_URL || ''; // Replace REACT_APP_ with VITE_ if using Vite
+const supabaseKey = process.env.REACT_APP_SUPABASE_ANON_KEY || '';
+
 export const supabase = createClient(supabaseUrl, supabaseKey);
-*/
