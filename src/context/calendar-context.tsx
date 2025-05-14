@@ -1,11 +1,21 @@
+<<<<<<< HEAD
 
 import { createContext, useContext, useState, ReactNode } from 'react';
+=======
+import { createContext, useContext, useState, ReactNode } from 'react';
+import { supabase } from '../supabaseClient';
+>>>>>>> 060614a (readded remote)
 
 export interface CalendarEvent {
   id: string;
   title: string;
+<<<<<<< HEAD
   start: Date;
   end: Date;
+=======
+  start: string;
+  end: string;
+>>>>>>> 060614a (readded remote)
   description: string;
   storeId: string;
   createdBy: string;
@@ -13,7 +23,12 @@ export interface CalendarEvent {
 
 interface CalendarContextType {
   calendarEvents: CalendarEvent[];
+<<<<<<< HEAD
   addCalendarEvent: (event: Omit<CalendarEvent, 'id'>) => CalendarEvent;
+=======
+  fetchCalendarEvents: () => Promise<void>;
+  addCalendarEvent: (event: Omit<CalendarEvent, 'id'>) => Promise<CalendarEvent | null>;
+>>>>>>> 060614a (readded remote)
 }
 
 const CalendarContext = createContext<CalendarContextType | undefined>(undefined);
@@ -27,6 +42,7 @@ export const useCalendar = () => {
 };
 
 export const CalendarProvider = ({ children }: { children: ReactNode }) => {
+<<<<<<< HEAD
   const [calendarEvents, setCalendarEvents] = useState<CalendarEvent[]>([
     {
       id: '1',
@@ -67,15 +83,91 @@ export const CalendarProvider = ({ children }: { children: ReactNode }) => {
     } catch (error) {
       console.error("Error adding calendar event:", error);
       throw error; // Rethrow to let the component handle it
+=======
+  const [calendarEvents, setCalendarEvents] = useState<CalendarEvent[]>([]);
+
+  const fetchCalendarEvents = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('calendar_events')
+        .select('*')
+        .order('start', { ascending: true });
+
+      if (error) throw error;
+
+      setCalendarEvents(data || []);
+    } catch (error) {
+      console.error('Error fetching calendar events:', error);
+    }
+  };
+
+  const addCalendarEvent = async (eventData: Omit<CalendarEvent, 'id'>) => {
+    try {
+      const { data, error } = await supabase
+        .from('calendar_events')
+        .insert(eventData)
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      setCalendarEvents((prev) => [...prev, data]);
+      return data;
+    } catch (error) {
+      console.error('Error adding calendar event:', error);
+      return null;
+>>>>>>> 060614a (readded remote)
     }
   };
 
   return (
+<<<<<<< HEAD
     <CalendarContext.Provider value={{
       calendarEvents,
       addCalendarEvent
     }}>
+=======
+    <CalendarContext.Provider
+      value={{ calendarEvents, fetchCalendarEvents, addCalendarEvent }}
+    >
+>>>>>>> 060614a (readded remote)
       {children}
     </CalendarContext.Provider>
   );
 };
+<<<<<<< HEAD
+=======
+
+export const fetchCalendarEvents = async (storeId: string) => {
+  const { data, error } = await supabase
+    .from('calendar_events')
+    .select('*')
+    .eq('store_id', storeId)
+    .order('start', { ascending: true });
+
+  if (error) {
+    console.error('Error fetching calendar events:', error);
+    return [];
+  }
+
+  return data;
+};
+
+export const createCalendarEvent = async (event: {
+  title: string;
+  description: string;
+  start: string;
+  end: string;
+  store_id: string;
+  created_by: string;
+}) => {
+  const { data, error } = await supabase.from('calendar_events').insert(event).select().single();
+
+  if (error) {
+    console.error('Error creating calendar event:', error);
+    return null;
+  }
+
+  return data;
+};
+>>>>>>> 060614a (readded remote)

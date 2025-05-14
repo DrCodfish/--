@@ -1,4 +1,7 @@
+<<<<<<< HEAD
 
+=======
+>>>>>>> 060614a (readded remote)
 import { createContext, useContext, useState, ReactNode } from 'react';
 
 export interface ForumPost {
@@ -113,3 +116,52 @@ export const ForumProvider = ({ children }: { children: ReactNode }) => {
     </ForumContext.Provider>
   );
 };
+<<<<<<< HEAD
+=======
+
+export const fetchForums = async () => {
+  const { data, error } = await supabase
+    .from('forums')
+    .select('*, forum_replies(*)')
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    console.error('Error fetching forums:', error);
+    return [];
+  }
+
+  return data;
+};
+
+export const createForumPost = async (post: {
+  title: string;
+  content: string;
+  author_id: string;
+  store_id: string;
+  region: string;
+}) => {
+  const { data, error } = await supabase.from('forums').insert(post).select().single();
+
+  if (error) {
+    console.error('Error creating forum post:', error);
+    return null;
+  }
+
+  return data;
+};
+
+export const addForumReply = async (reply: {
+  forum_id: string;
+  content: string;
+  author_id: string;
+}) => {
+  const { data, error } = await supabase.from('forum_replies').insert(reply).select().single();
+
+  if (error) {
+    console.error('Error adding forum reply:', error);
+    return null;
+  }
+
+  return data;
+};
+>>>>>>> 060614a (readded remote)

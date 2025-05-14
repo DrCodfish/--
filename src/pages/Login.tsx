@@ -22,41 +22,73 @@ const Login = () => {
   const [employeePassword, setEmployeePassword] = useState("");
   const [storePassword, setStorePassword] = useState("");
   
+<<<<<<< HEAD
   const handleOwnerLogin = (e: React.FormEvent) => {
     e.preventDefault();
     
     const user = login(ownerUsername, ownerPassword, true);
     
     if (user) {
+=======
+  const handleOwnerLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    console.log("Login form submitted with username:", ownerUsername);
+    const user = await login(ownerUsername, ownerPassword);
+    if (user) {
+      console.log("Login successful. User:", user);
+>>>>>>> 060614a (readded remote)
       toast({
         title: "Login successful",
         description: "Welcome back!",
       });
       navigate("/dashboard");
     } else {
+<<<<<<< HEAD
       toast({
         title: "Login failed",
         description: "Invalid username or password",
+=======
+      console.error("Login failed. Please check your credentials.");
+      toast({
+        title: "Login failed",
+        description: "Invalid username, password, or unapproved account",
+>>>>>>> 060614a (readded remote)
         variant: "destructive",
       });
     }
   };
   
+<<<<<<< HEAD
   const handleEmployeeLogin = (e: React.FormEvent) => {
     e.preventDefault();
     
     const user = login(employeeUsername, employeePassword, false);
     
     if (user) {
+=======
+  const handleEmployeeLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    console.log("Login form submitted with username:", employeeUsername);
+    const user = await login(employeeUsername, employeePassword);
+    if (user) {
+      console.log("Login successful. User:", user);
+>>>>>>> 060614a (readded remote)
       toast({
         title: "Login successful",
         description: "Welcome back!",
       });
       navigate("/dashboard");
     } else {
+<<<<<<< HEAD
       toast({
         title: "Login failed",
         description: "Invalid username or password",
+=======
+      console.error("Login failed. Please check your credentials.");
+      toast({
+        title: "Login failed",
+        description: "Invalid username, password, or unapproved account",
+>>>>>>> 060614a (readded remote)
         variant: "destructive",
       });
     }
